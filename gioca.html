@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gioca - Smistamento Magico</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000000;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    #backBtn {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      z-index: 1000;
+      filter: drop-shadow(0 0 5px #ffd700) drop-shadow(0 0 10px #ffd700);
+      transition: transform 0.2s ease;
+    }
+
+    #backBtn:hover {
+      transform: scale(1.2);
+    }
+
+    #result-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: opacity 0.5s ease;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .house-name {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+    }
+
+    @keyframes fadeInZoom {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .house-logo {
+      width: 300px;
+      height: auto;
+      display: none;
+      transition: filter 0.3s ease;
+      filter: drop-shadow(0 0 20px white) drop-shadow(0 0 40px white);
+      animation: fadeInZoom 0.5s ease;
+    }
+
+    .student-name {
+      margin-top: 20px;
+      font-size: 32px;
+      font-weight: bold;
+      text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+    }
+
+    /* Stile recap */
+    .recap-container {
+      color: white;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .recap-house {
+      margin-bottom: 40px;
+      border-bottom: 1px solid #444;
+      padding-bottom: 20px;
+    }
+
+    .recap-house h3 {
+      margin-bottom: 8px;
+      font-size: 28px;
+      text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+    }
+
+    .recap-house ul {
+      list-style-type: none;
+      padding: 0;
+      margin-top: 10px;
+      font-size: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .recap-house ul li {
+      background: rgba(255 255 255 / 0.1);
+      border-radius: 6px;
+      padding: 6px 12px;
+    }
+
+    .recap-house img {
+      width: 150px;
+      margin-bottom: 15px;
+      filter: drop-shadow(0 0 15px currentColor);
+    }
+
+    #homeBtn {
+      margin-top: 30px;
+      padding: 12px 24px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #000;
+      background: #ffd700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 0 15px #ffd700;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    #homeBtn:hover {
+      background: #ffea00;
+      color: #222;
+    }
+  </style>
+</head>
+<body onclick="revealNext()">
+  <a href="index.html" onclick="event.stopPropagation();">
+    <img id="backBtn" src="exit.png" alt="Torna indietro" title="Torna indietro">
+  </a>
+
+  <div id="result-container">
+    <div class="house-name" id="houseName">Clicca per iniziare lo smistamento</div>
+    <img id="houseLogo" class="house-logo" src="" alt="Logo casa">
+    <div id="studentName" class="student-name"></div>
+  </div>
+
+  <script>
+    const houseData = [
+      { name: 'Grifondoro', logo: 'Grifondoro.png', color: '#a00000' },
+      { name: 'Serpeverde', logo: 'Serpeverde.png', color: '#006400' },
+      { name: 'Corvonero', logo: 'Corvonero.png', color: '#003366' },
+      { name: 'Tassorosso', logo: 'Tassorosso.png', color: '#daa520' }
+    ];
+
+    let queue = [];
+    let index = 0;
+    let voices = [];
+
+    // Carica le voci disponibili e salva in voices
+    speechSynthesis.onvoiceschanged = () => {
+      voices = speechSynthesis.getVoices();
+    };
+
+    function getHumanLikeVoice() {
+      // Cerca una voce italiana "Google" o almeno italiana
+      return voices.find(v => v.lang.startsWith('it') && v.name.toLowerCase().includes('google'))
+          || voices.find(v => v.lang.startsWith('it'))
+          || voices[0];
+    }
+
+    function speakText(text) {
+      if (!voices.length) {
+        // Se le voci non sono ancora caricate, attendi un attimo e riprova
+        setTimeout(() => speakText(text), 200);
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.voice = getHumanLikeVoice();
+      utterance.rate = 1;       // velocità (0.1 - 10)
+      utterance.pitch = 1;      // altezza (0 - 2)
+      speechSynthesis.speak(utterance);
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function prepareQueue() {
+      const names = JSON.parse(localStorage.getItem('noms') || '[]')
+        .map(n => n.trim())
+        .filter(n => n);
+
+      if (names.length === 0) {
+        const houseNameEl = document.getElementById('houseName');
+        houseNameEl.textContent = 'Nessun nome trovato. Vai alla pagina impostazioni e inserisci i nomi.';
+        return;
+      }
+
+      shuffle(names);
+
+      const teams = [[], [], [], []];
+      for (let i = 0; i < names.length; i++) {
+        teams[i % 4].push(names[i]);
+      }
+
+      for (let i = 0; i < 4; i++) {
+        teams[i].forEach(name => {
+          queue.push({ name, house: houseData[i] });
+        });
+      }
+
+      shuffle(queue);
+    }
+
+    function revealNext() {
+      const houseNameEl = document.getElementById('houseName');
+      const houseLogoEl = document.getElementById('houseLogo');
+      const studentNameEl = document.getElementById('studentName');
+      const container = document.getElementById('result-container');
+
+      if (container.classList.contains('recap-active')) return;
+
+      container.style.opacity = 0;
+
+      setTimeout(() => {
+        if (index >= queue.length) {
+          houseNameEl.textContent = 'Riepilogo squadre';
+          houseNameEl.style.color = 'white';
+          houseLogoEl.style.display = 'none';
+          studentNameEl.textContent = '';
+
+          const recapData = houseData.map(house => {
+            return {
+              house: house.name,
+              color: house.color,
+              logo: house.logo,
+              names: queue.filter(item => item.house.name === house.name).map(item => item.name)
+            };
+          });
+
+          let recapHtml = '<div class="recap-container">';
+          recapData.forEach(group => {
+            recapHtml += `<div class="recap-house" style="color:${group.color}">`;
+            recapHtml += `<img src="${group.logo}" alt="${group.house} logo" />`;
+            recapHtml += `<h3>${group.house}</h3><ul>`;
+            if (group.names.length === 0) {
+              recapHtml += '<li>(nessun membro)</li>';
+            } else {
+              group.names.forEach(n => {
+                recapHtml += `<li>${n}</li>`;
+              });
+            }
+            recapHtml += '</ul></div>';
+          });
+          recapHtml += `<button id="homeBtn" onclick="goHome(event)">Torna alla pagina iniziale</button>`;
+          recapHtml += '</div>';
+
+          container.innerHTML = recapHtml;
+          container.classList.add('recap-active');
+          container.style.opacity = 1;
+
+          return;
+        }
+
+        const current = queue[index];
+        houseNameEl.textContent = current.house.name;
+        houseNameEl.style.color = current.house.color;
+        houseLogoEl.src = current.house.logo;
+        houseLogoEl.style.display = 'block';
+        studentNameEl.textContent = current.name;
+        studentNameEl.style.color = current.house.color;
+
+        container.style.opacity = 1;
+
+        speakText(`${current.name}, ${current.house.name}!`);
+
+        index++;
+      }, 500);
+    }
+
+    function goHome(event) {
+      event.stopPropagation();
+      location.href = 'index.html';
+    }
+
+    window.onload = () => {
+      prepareQueue();
+    };
+  </script>
+</body>
+</html>

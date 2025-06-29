@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Harry Potter Sorting</title>
+  <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-image: url('sfondo.jpg');
+      background-size: cover;
+      background-position: center;
+      height: 100vh;
+      font-family: 'UnifrakturCook', cursive;
+      position: relative;
+      overflow: hidden;
+      cursor: default;
+    }
+
+    #hat {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 350px;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      transition: filter 0.3s ease, transform 0.3s ease;
+    }
+
+    #hat:hover {
+      filter: drop-shadow(0 0 10px #ffd700) drop-shadow(0 0 20px #ffd700);
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    #settingBtn {
+      position: fixed;
+      top: 50%;
+      right: 0;
+      transform: translate(50%, -50%);
+      width: 60px; /* dimensione icona */
+      height: 60px;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      z-index: 1000;
+      filter: drop-shadow(0 0 0 transparent);
+    }
+
+    #settingBtn.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #settingBtn:hover {
+      filter: drop-shadow(0 0 8px #ffd700) drop-shadow(0 0 15px #ffd700);
+      transform: translate(50%, -50%) scale(1.1);
+      transition: filter 0.3s ease, transform 0.3s ease, opacity 0.4s ease;
+    }
+  </style>
+</head>
+<body>
+  <!-- Il logo diventa un link a gioca.html -->
+  <a href="gioca.html">
+    <img src="logo.png" alt="Cappello Parlante" id="hat" />
+  </a>
+
+  <!-- Pulsante Setting come immagine -->
+  <a href="impostazioni.html">
+    <img src="icon.png" alt="Impostazioni" id="settingBtn" />
+  </a>
+
+  <script>
+    const settingBtn = document.getElementById('settingBtn');
+
+    window.addEventListener('mousemove', (e) => {
+      const viewportWidth = window.innerWidth;
+      if (e.clientX > viewportWidth - 150) {
+        settingBtn.classList.add('visible');
+      } else {
+        settingBtn.classList.remove('visible');
+      }
+    });
+  </script>
+</body>
+</html>

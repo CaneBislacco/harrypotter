@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Impostazioni - Smistamento Magico</title>
+<style>
+  body {
+    background-color: #000;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    min-height: 100vh;
+  }
+
+  /* Pulsante exit in alto a sinistra */
+  #backBtn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    z-index: 1000;
+    filter: drop-shadow(0 0 5px #ffd700) drop-shadow(0 0 10px #ffd700);
+    transition: transform 0.2s ease;
+  }
+  #backBtn:hover {
+    transform: scale(1.2);
+  }
+
+  #inputContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 500px;
+    width: 100%;
+  }
+  #nameInput {
+    flex-grow: 1;
+    padding: 12px 16px;
+    font-size: 18px;
+    border: none;
+    border-radius: 25px;
+    outline: none;
+    background: #222;
+    color: white;
+  }
+  #sendButton {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s ease;
+  }
+  #sendButton:hover {
+    background: #ddd;
+  }
+  #sendButton svg {
+    width: 20px;
+    height: 20px;
+    fill: #000;
+  }
+  hr {
+    width: 100%;
+    max-width: 500px;
+    border: 1px solid #444;
+    margin: 25px 0 20px 0;
+  }
+
+  /* Lista nomi senza riquadro o sfondo */
+  #namesList {
+    max-width: 500px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  #namesList div {
+    padding: 10px 15px;
+    /* rimosso background e border-radius */
+    font-size: 18px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+  }
+  #namesList div:hover {
+    background: #444; /* rimane evidenziazione al passaggio */
+  }
+</style>
+</head>
+<body>
+
+  <!-- Bottone exit con immagine -->
+  <a href="index.html" onclick="event.stopPropagation();">
+    <img id="backBtn" src="exit.png" alt="Torna indietro" />
+  </a>
+
+  <div id="inputContainer">
+    <input type="text" id="nameInput" placeholder="Scrivi un nome..." autocomplete="off" />
+    <button id="sendButton" aria-label="Invia nome">
+      <!-- Icona freccia destra -->
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M10 17l5-5-5-5v10z" />
+      </svg>
+    </button>
+  </div>
+
+  <hr />
+
+  <div id="namesList"></div>
+
+<script>
+  const nameInput = document.getElementById('nameInput');
+  const sendButton = document.getElementById('sendButton');
+  const namesList = document.getElementById('namesList');
+
+  let names = JSON.parse(localStorage.getItem('noms')) || [];
+
+  function updateList() {
+    namesList.innerHTML = '';
+    names.forEach((name, index) => {
+      const nameDiv = document.createElement('div');
+      nameDiv.textContent = name;
+      // Clicca su nome per eliminarlo
+      nameDiv.addEventListener('click', () => {
+        names.splice(index, 1);
+        saveNames();
+        updateList();
+      });
+      namesList.appendChild(nameDiv);
+    });
+  }
+
+  function saveNames() {
+    localStorage.setItem('noms', JSON.stringify(names));
+  }
+
+  function addName() {
+    const newName = nameInput.value.trim();
+    if (newName === '') {
+      alert('Inserisci un nome valido!');
+      return;
+    }
+    names.push(newName);
+    saveNames();
+    updateList();
+    nameInput.value = '';
+    nameInput.focus();
+  }
+
+  sendButton.addEventListener('click', addName);
+
+  nameInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') addName();
+  });
+
+  updateList();
+</script>
+
+</body>
+</html>
